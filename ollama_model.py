@@ -45,16 +45,15 @@ class OllamaModel():
         img_b64 = self._b64_image(image_path)
 
         system_prompt = kwargs.get("system_prompt", "You are a strict OCR engine. Extract jersey NUMBER and LAST NAME. Return JSON only.")
-        # format = kwargs.get("format", { "type": "object",
-        #                                 "properties": {
-        #                                     "number": { "type": ["integer", "null"] },
-        #                                     "last_name": { "type": ["string", "null"] },
-        #                                     "confidence": { "type": "number" }
-        #                                 },
-        #                                 "required": ["number", "last_name", "confidence"]
-        #                                 }
-        # )
-        format = kwargs.get("format", "json")
+        format = kwargs.get("format", { "type": "object",
+                                        "properties": {
+                                            "number": { "type": ["integer", "null"] },
+                                            "last_name": { "type": ["string", "null"] },
+                                            "confidence": { "type": "number" }
+                                        },
+                                        "required": ["number", "last_name", "confidence"]
+                                        }
+        )
         keep_alive = kwargs.get("keep_alive", "10m")
         options = kwargs.get("options", {"temperature": 0.0})
 
