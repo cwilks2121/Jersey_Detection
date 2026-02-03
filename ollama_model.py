@@ -49,9 +49,10 @@ class OllamaModel():
                                         "properties": {
                                             "number": { "type": ["integer", "null"] },
                                             "last_name": { "type": ["string", "null"] },
+                                            "color": { "type": ["string", "null"] },
                                             "confidence": { "type": "number" }
                                         },
-                                        "required": ["number", "last_name", "confidence"]
+                                        "required": ["number", "last_name", "color","confidence"]
                                         }
         )
         keep_alive = kwargs.get("keep_alive", "10m")
