@@ -7,3 +7,5 @@ Tasks
 - Create a pipeline using Yolo and one of the models
 - Change system prompt and prompt to be more specific
 - Create a graphic comparing kimi-k2.5, gemma3, and qwen3-vl performance
+- Extract ground truth from image names
+- Find best ways to represent and pass in our data through the pipeline
