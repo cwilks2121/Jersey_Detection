@@ -12,10 +12,11 @@ DONE - Extract ground truth from image names
 
 
 Stuff to do
-- Use an ollama model in conjuction with YOLO to downscale images and achieve higher accuracy.
+- Use an ollama model in conjuction with YOLO to downscale images, find individuals in the image, and achieve higher accuracy.
 - Do prompt engineering to find the best prompt.
 - Determine a good way to take the returned pandas dataframe and save and interpret the results.
 - Explore cheap cloud models that 40NorthLabs may potentially be interested in.
 - Explore model parameters like payload and options.
 - Design a single script that can test multiple models at once.
+- Output tokens and other useful informations into our output dataframe.
 
