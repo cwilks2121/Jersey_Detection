@@ -1,11 +1,22 @@
 Tasks
 - Print out number of tokens and time used per image
-- Explore what information we can extract from each image (last name, number, color, etc.)
-- Print out accuracy and hallucination rate
-- Allow for printing of multiple jersey classifications in one image
+DONE - Explore what information we can extract from each image (last name, number, color, etc.)
+DONE - Print out accuracy and hallucination rate
+DONE - Allow for printing of multiple jersey classifications in one image
 - Work out a demo for kimi-k2.5, gemma3, and qwen3-vl
 - Create a pipeline using Yolo and one of the models
-- Change system prompt and prompt to be more specific
+DONE - Change system prompt and prompt to be more specific
 - Create a graphic comparing kimi-k2.5, gemma3, and qwen3-vl performance
-- Extract ground truth from image names
+DONE - Extract ground truth from image names
 - Find best ways to represent and pass in our data through the pipeline
+
+
+Stuff to do
+- Use an ollama model in conjuction with YOLO to downscale images, find individuals in the image, and achieve higher accuracy.
+- Do prompt engineering to find the best prompt.
+- Determine a good way to take the returned pandas dataframe and save and interpret the results.
+- Explore cheap cloud models that 40NorthLabs may potentially be interested in.
+- Explore model parameters like payload and options.
+- Design a single script that can test multiple models at once.
+- Output tokens and other useful informations into our output dataframe.
+

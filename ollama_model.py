@@ -2,6 +2,9 @@ import base64
 import json
 import requests
 from pathlib import Path
+import re
+import time
+import json
 
 class OllamaModel():
     def __init__(self, model_name: str, ollama_url: str = "http://localhost:11434/api/chat"):
@@ -44,19 +47,35 @@ class OllamaModel():
         
         img_b64 = self._b64_image(image_path)
 
-        system_prompt = kwargs.get("system_prompt", "You are a strict OCR engine. Extract jersey NUMBER and LAST NAME. Return JSON only.")
+        system_prompt = kwargs.get("system_prompt", "You are a strict OCR engine. Extract JERSEY NUMBER, JERSEY COLOR, and LAST NAME. " \
+                                                    "Each list for the key fields must have the same length. Return JSON only.")
         format = kwargs.get("format", { "type": "object",
                                         "properties": {
-                                            "number": { "type": ["integer", "null"] },
-                                            "last_name": { "type": ["string", "null"] },
-                                            "color": { "type": ["string", "null"] },
-                                            "confidence": { "type": "number" }
+                                            "number": {
+                                                "type": "array",
+                                                "items": { "type": ["integer", "null"] }
+                                            },
+                                            "last_name": { 
+                                                "type": "array",
+                                                "items": { "type": ["string", "null"] }
+                                            },
+                                            "color": { 
+                                                "type": "array",
+                                                "items": { "type": ["string", "null"] }
+                                            },
+                                            "confidence": { 
+                                                "type": "array",
+                                                "items": { "type": ["number", "null"] }
+                                            },
                                         },
-                                        "required": ["number", "last_name", "color","confidence"]
+                                        "required": ["number", "last_name", "color", "confidence"]
                                         }
         )
-        keep_alive = kwargs.get("keep_alive", "10m")
-        options = kwargs.get("options", {"temperature": 0.0})
+        keep_alive = kwargs.get("keep_alive", "1h")
+        # options = kwargs.get("options", {
+        #                                     "temperature": 0.0
+        #                                 }
+        # )
 
         payload = {
             "model": self.model_name,
@@ -67,10 +86,10 @@ class OllamaModel():
             "format": format,
             "stream": False,
             "keep_alive": keep_alive,
-            "options": options
+            # "options": options
         }
 
-        r = self.session.post(self.ollama_url, json=payload, timeout=120)
+        r = self.session.post(self.ollama_url, json=payload, timeout=None)
 
         if r.status_code != 200:
             raise RuntimeError(f"Ollama error {r.status_code}: {r.text}")
@@ -80,4 +99,6 @@ class OllamaModel():
         content = out["message"]["content"]
 
         return json.loads(content)
+
+
 
