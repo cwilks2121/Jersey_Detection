@@ -19,4 +19,5 @@ Stuff to do
 - Explore model parameters like payload and options.
 - Design a single script that can test multiple models at once.
 - Output tokens and other useful informations into our output dataframe.
+- Investigate how we can use OCRs in our pipeline. Particularly for candidate characters and then have the VLM determine what the best candidate is.
 
