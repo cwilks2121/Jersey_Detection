@@ -2,9 +2,6 @@ import base64
 import json
 import requests
 from pathlib import Path
-import re
-import time
-import json
 
 class OllamaModel():
     def __init__(self, model_name: str, ollama_url: str = "http://localhost:11434/api/chat"):
