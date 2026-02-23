@@ -14,7 +14,7 @@ class OllamaModel():
         data = Path(path).read_bytes()
         return base64.b64encode(data).decode("utf-8")
 
-    def extract_jersey_information(self, image_path: str, prompt: str, **kwargs) -> dict:
+    def extract_jersey_information(self, image_path: str, system_prompt: str, **kwargs) -> dict:
         """
         Docstring for extract_jersey_information
         
@@ -22,13 +22,13 @@ class OllamaModel():
         ----------
         image_path : str
             Path to the image file.
-        prompt : str
-            The prompt to send to the model.
-        payload : dict
-            Additional payload data for the request.
+        system_prompt : str
+            The system prompt to send to the model.
         **kwargs : dict
-            system_prompt : str, optional
-                System prompt for the model.
+            payload : dict, optional
+                Additional payload data for the request.
+            prompt : str, optional
+                Prompt for the model.
             format : dict, optional
                 Format specification for the output.
             keep_alive : bool, optional
@@ -44,35 +44,44 @@ class OllamaModel():
         
         img_b64 = self._b64_image(image_path)
 
-        system_prompt = kwargs.get("system_prompt", "You are a strict OCR engine. Extract JERSEY NUMBER, JERSEY COLOR, and LAST NAME. " \
-                                                    "Each list for the key fields must have the same length. Return JSON only.")
-        format = kwargs.get("format", { "type": "object",
-                                        "properties": {
-                                            "number": {
-                                                "type": "array",
-                                                "items": { "type": ["integer", "null"] }
+        prompt = kwargs.get("prompt", "Follow the system prompt to extract jersey information from the image.")
+        format = kwargs.get("format", {
+                                            "type": "object",
+                                            "properties": {
+                                                "jerseys": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "jersey_number": {
+                                                                "type": ["integer", "null"]
+                                                            },
+                                                            "last_name": {
+                                                                "type": ["string", "null"]
+                                                            },
+                                                            "jersey_color": {
+                                                                "type": ["string", "null"]
+                                                            },
+                                                            "number_color": {
+                                                                "type": ["string", "null"]
+                                                            },
+                                                            "confidence": {
+                                                                "type": "number",
+                                                                "minimum": 0,
+                                                                "maximum": 100
+                                                            }
+                                                        }
+                                                    }    
+                                                }
                                             },
-                                            "last_name": { 
-                                                "type": "array",
-                                                "items": { "type": ["string", "null"] }
-                                            },
-                                            "color": { 
-                                                "type": "array",
-                                                "items": { "type": ["string", "null"] }
-                                            },
-                                            "confidence": { 
-                                                "type": "array",
-                                                "items": { "type": ["number", "null"] }
-                                            },
-                                        },
-                                        "required": ["number", "last_name", "color", "confidence"]
+                                            "required": ["jerseys"]
                                         }
         )
-        keep_alive = kwargs.get("keep_alive", "1h")
-        # options = kwargs.get("options", {
-        #                                     "temperature": 0.0
-        #                                 }
-        # )
+
+        options = kwargs.get("options", {
+                                            "temperature": 0.0
+                                        }
+        )
 
         payload = {
             "model": self.model_name,
@@ -82,11 +91,10 @@ class OllamaModel():
             ],
             "format": format,
             "stream": False,
-            "keep_alive": keep_alive,
-            # "options": options
+            "options": options
         }
 
-        r = self.session.post(self.ollama_url, json=payload, timeout=None)
+        r = self.session.post(self.ollama_url, json=payload, timeout=300)
 
         if r.status_code != 200:
             raise RuntimeError(f"Ollama error {r.status_code}: {r.text}")

@@ -1,32 +1,71 @@
 import pandas as pd
 
 class DataFrameCreator:
-    def __init__(self, fields=['image', 'number', 'last_name', 'color', 'confidence', 'number_ground_truth', 'f1_score', 'hallucination_rate', 'true_number_of_players']):
+    def __init__(self, fields=['image', 'boxed_image','jersey_number', 'last_name', 'jersey_color', 'number_color', 'confidence', 'number_ground_truth', 'correctly_identified_numbers', 'false_positives', 'f1_score', 'hallucination_rate', 'true_number_of_players']):
         self.fields = fields
         self.df = pd.DataFrame({field: [] for field in self.fields})
 
-
     def append_df_from_output(self, json_output, img_path):
+        jersey_numbers, jersey_colors, last_names, number_colors, confidences = self.extract_numbers_and_colors_from_model_json(json_output)
 
         ground_truth = self._compute_ground_truth(img_path)
         num_true_players = len(ground_truth)
 
-        f1_score = self._compute_f1_score(json_output['number'], ground_truth)
-        hallucination_rate = self._compute_hallucination_rate(json_output['number'], ground_truth)
+        f1_score = self._compute_f1_score(jersey_numbers, ground_truth)
+        hallucination_rate = self._compute_hallucination_rate(jersey_numbers, ground_truth)
 
         row = {
             "image": img_path,
-            "number": json_output["number"],
-            "last_name": json_output["last_name"],
-            "color": json_output["color"],
-            "confidence": json_output["confidence"],
+            "boxed_image": img_path.replace("images/", "boxed_images/"),
+            "jersey_number": jersey_numbers,
+            "last_name": last_names,
+            "jersey_color": jersey_colors,
+            "number_color": number_colors,
+            "confidence": confidences,
             "number_ground_truth": ground_truth,
+            "correctly_identified_numbers": list(set(jersey_numbers) & set(ground_truth)),
+            "false_positives": list(set(jersey_numbers) - set(ground_truth)),
             "f1_score": f1_score,
             "hallucination_rate": hallucination_rate,
             "true_number_of_players": num_true_players,
         }
 
         self.df = pd.concat([self.df, pd.DataFrame([row])], ignore_index=True)
+    
+    def extract_numbers_and_colors_from_model_json(self, json_output):
+        """
+        Pull jersey numbers out of the model's JSON output.
+        It expects something like: {"jerseys": [{"jersey_number": 19}, {"jersey_number": 8}, ...]}
+        Returns: a list of unique jersey numbers (ints), in the same order they appear.
+        """
+        jersey_numbers = []
+        last_names = []
+        jersey_colors = []
+        number_colors = []
+        confidences = []
+
+        # Get the jerseys from the JSON
+        jerseys = json_output.get("jerseys", [])
+
+        # Get all the jersey numbers (that are ints)
+        for j in jerseys:
+            n = j.get("jersey_number", None)
+            c = j.get("jersey_color", None)
+            l = j.get("last_name", None)
+            nc = j.get("number_color", None)
+            conf = j.get("confidence", None)
+            if n is not None:
+                jersey_numbers.append(n)
+            if c is not None:
+                jersey_colors.append(c)
+            if l is not None:
+                last_names.append(l)
+            if nc is not None:
+                number_colors.append(nc)
+            if conf is not None:
+                confidences.append(conf)
+
+        return jersey_numbers, jersey_colors, last_names, number_colors, confidences
     
     def _compute_ground_truth(self, img_path):
         ground_truth = []

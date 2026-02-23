@@ -21,3 +21,8 @@ Stuff to do
 - Output tokens and other useful informations into our output dataframe.
 - Investigate how we can use OCRs in our pipeline. Particularly for candidate characters and then have the VLM determine what the best candidate is.
 
+Week 4
+- Try and get qwen3-vl to work using Ollama.
+- Match html output that Scott has for his model.
+- Update the system architecture.
+
