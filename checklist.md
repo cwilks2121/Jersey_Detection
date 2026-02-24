@@ -26,3 +26,4 @@ Week 4
 - Match html output that Scott has for his model.
 - Update the system architecture.
 
+- Test with deep segmentation to get rid of clutter in the image.
