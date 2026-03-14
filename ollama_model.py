@@ -83,6 +83,8 @@ class OllamaModel():
                                         }
         )
 
+        keep_alive = kwargs.get("keep_alive")
+
         payload = {
             "model": self.model_name,
             "messages": [
@@ -93,6 +95,9 @@ class OllamaModel():
             "stream": False,
             "options": options
         }
+
+        if keep_alive is not None:
+            payload["keep_alive"] = keep_alive
 
         r = self.session.post(self.ollama_url, json=payload, timeout=300)
 

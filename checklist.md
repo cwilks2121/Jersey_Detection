@@ -27,3 +27,16 @@ Week 4
 - Update the system architecture.
 
 - Test with deep segmentation to get rid of clutter in the image.
+- Add text recognition to the pipeline after the YOLO layer
+- Play around with the confidence level on YOLO on detecting people
+- Filter out labels on the YOLO model to only detect humans (done)
+- Get qwen VL to start working at a reasonable speed
+- See if I can use GPU resources instead of a for loop with Ollama
+
+1. Build a number region dataset: https://universe.roboflow.com/yakovk/jersey-numbers-i1wn5/dataset/2
+-- yolo detect train data=jersey-numbers.v2i.yolo26/data.yaml model=yolo26n.pt imgsz=960 epochs=80 batch=16
+
+Remove the cropped region of jersey and just use paddle ocr on the yolo cropped region
+Change the system prompt to check the predicted number above the bounding boxes created by paddleocr
+Utilize GPU resources to run faster
+Test confidence thresholds on both YOLO and paddleocr
