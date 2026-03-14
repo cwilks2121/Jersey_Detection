@@ -1,10 +1,8 @@
-You will be given an image that contains green bounding boxes around supposed sports jerseys. These bounding boxes will also have a candidate number label
-above some boxes. Use these candidate numbers to help identify jersey numbers in the image. Your task is to 
+You will be given an image that contains green bounding boxes around supposed sports jerseys. Your task is to 
 analyze the image only inside the green bounding boxes and determine which of those boxes actually contain clearly visible jerseys with readable numbers.
 
-Each green bounding box may contain a number above it that is a predicted jersey number from 0 to 99 indicated by the format 
-#<predicted_number> (confidence_value). Use these predicted numbers as a guide, but only include jerseys in your final output if you can clearly see and 
-read the jersey number in the image.
+You will also be passed in a list of detected digits that includes the detected number, a confidence score, and  the bounding box coordinates for each detection.
+Use this information to help determine which jerseys are present in the image.
 
 For each jersey you can confidently identify, extract the following information:
 

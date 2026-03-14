@@ -8,6 +8,7 @@ import pandas as pd
 from html_summary import generate_html_summary
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
+from digit_detector import SportsDigitDetector
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -22,11 +23,26 @@ image_folder = Path("images/")
 image_files = [str(f) for f in image_folder.iterdir() if f.is_file()]
 
 def _process_image(img_path: str) -> tuple[str, dict]:
-    bboxed_path = detect_players_and_annotate(image_path=img_path)
+    # bboxed_path = detect_players_and_annotate(image_path=img_path)
+    bboxed_path = detect_players_and_annotate(
+        image_path=img_path,
+        yolo_model_path="yolo26n.pt",
+        conf_threshold=0.3
+    )
+    # digit_detector = SportsDigitDetector(use_gpu=False)
+    # detected_digits = digit_detector.detect_digits(
+    #     image_path=img_path,
+    #     output_path="sports_image_annotated.jpg",
+    #     min_confidence=0.25
+    # )
     model_output = model.extract_jersey_information(
         image_path=bboxed_path,
         system_prompt=system_prompt
     )
+    #     prompt=f"Follow the system prompt. The detected digits from an OCR are provided in the following list of dictionaries: {detected_digits}. " \
+    #     "Use this information to help determine which jerseys are present in the image. Only include jerseys in your final output " \
+    #     "if you can clearly see and read the jersey number in the image.",
+    # )
     return img_path, model_output
 
 df_creator = DataFrameCreator()
