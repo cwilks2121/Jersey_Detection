@@ -1,19 +1,21 @@
+from torch import Use
+
 from ollama_model import OllamaModel
 from dataframe_creation import DataFrameCreator
 from compute_statistics import compute_f1_and_hallucination
 from pathlib import Path
-from yolo_detection import detect_players_and_annotate
+import yolo_detection
 import time
 import pandas as pd
 from html_summary import generate_html_summary
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
-from digit_detector import SportsDigitDetector
+import digit_detection
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
-model_name = "gemma3:27b"
+model_name = "qwen3.5:9b"
 model = OllamaModel(model_name=model_name)
 
 with open('system_prompt.txt', 'r') as file:
@@ -23,26 +25,20 @@ image_folder = Path("images/")
 image_files = [str(f) for f in image_folder.iterdir() if f.is_file()]
 
 def _process_image(img_path: str) -> tuple[str, dict]:
-    # bboxed_path = detect_players_and_annotate(image_path=img_path)
-    bboxed_path = detect_players_and_annotate(
+    # predicted_digits = digit_detection.extract_digits_from_image(img_path)
+    bboxed_path = yolo_detection.detect_players_and_annotate(
         image_path=img_path,
         yolo_model_path="yolo26n.pt",
-        conf_threshold=0.3
+        conf_threshold=0.2
     )
-    # digit_detector = SportsDigitDetector(use_gpu=False)
-    # detected_digits = digit_detector.detect_digits(
-    #     image_path=img_path,
-    #     output_path="sports_image_annotated.jpg",
-    #     min_confidence=0.25
-    # )
     model_output = model.extract_jersey_information(
         image_path=bboxed_path,
-        system_prompt=system_prompt
+        system_prompt=system_prompt,
+        # prompt=f"Follow the system prompt. The detected digits from an OCR are provided in the following list: {predicted_digits}. "
+        #         "Use these detected digits to help you identify the jersey numbers of the players in the image. If you cannot confidently identify a player's jersey number, " 
+        #         "do not guess and leave it blank. Always use the detected digits as a reference to ensure your identifications are as accurate as possible."
     )
-    #     prompt=f"Follow the system prompt. The detected digits from an OCR are provided in the following list of dictionaries: {detected_digits}. " \
-    #     "Use this information to help determine which jerseys are present in the image. Only include jerseys in your final output " \
-    #     "if you can clearly see and read the jersey number in the image.",
-    # )
+
     return img_path, model_output
 
 df_creator = DataFrameCreator()
