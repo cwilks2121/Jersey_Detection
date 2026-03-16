@@ -109,6 +109,3 @@ class OllamaModel():
         content = out["message"]["content"]
 
         return json.loads(content)
-
-
-

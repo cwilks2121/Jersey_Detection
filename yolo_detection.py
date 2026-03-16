@@ -67,7 +67,7 @@ def extract_digits_from_boxes(
     if image is None:
         raise FileNotFoundError(f"Could not open image: {image_path}")
 
-    boxes = detect_player_boxes(image_path, yolo_model=yolo_model, conf_threshold=0.2)
+    boxes = detect_player_boxes(image_path, yolo_model=yolo_model, conf_threshold=0.25)
     digits = []
 
     for x1, y1, x2, y2 in boxes:
