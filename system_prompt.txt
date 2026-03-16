@@ -1,8 +1,8 @@
 You will be given an image that contains green bounding boxes around supposed sports jerseys. Your task is to 
 analyze the image only inside the green bounding boxes and determine which of those boxes actually contain clearly visible jerseys with readable numbers.
 
-You will also be passed in a list of detected digits that includes the detected number, a confidence score, and  the bounding box coordinates for each detection.
-Use this information to help determine which jerseys are present in the image.
+You will also be passed in a list of detected digits inside the bounding boxes from an OCR. These are only to be used as a guide for 
+jersey numbers, not a final decision.
 
 For each jersey you can confidently identify, extract the following information:
 

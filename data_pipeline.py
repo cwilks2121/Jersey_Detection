@@ -1,5 +1,3 @@
-from torch import Use
-
 from ollama_model import OllamaModel
 from dataframe_creation import DataFrameCreator
 from compute_statistics import compute_f1_and_hallucination
@@ -10,12 +8,13 @@ import pandas as pd
 from html_summary import generate_html_summary
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
-import digit_detection
+from ultralytics import YOLO
+import easyocr
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
-model_name = "qwen3.5:9b"
+model_name = "gemma3:27b"
 model = OllamaModel(model_name=model_name)
 
 with open('system_prompt.txt', 'r') as file:
@@ -24,19 +23,25 @@ with open('system_prompt.txt', 'r') as file:
 image_folder = Path("images/")
 image_files = [str(f) for f in image_folder.iterdir() if f.is_file()]
 
+yolo_model = YOLO("yolo26n.pt")
+ocr_model = easyocr.Reader(["en"], gpu=True)
+
 def _process_image(img_path: str) -> tuple[str, dict]:
-    # predicted_digits = digit_detection.extract_digits_from_image(img_path)
+    predicted_digits = yolo_detection.extract_digits_from_boxes(
+        image_path=img_path,
+        yolo_model=yolo_model,
+        ocr_model=ocr_model
+    )
     bboxed_path = yolo_detection.detect_players_and_annotate(
         image_path=img_path,
-        yolo_model_path="yolo26n.pt",
+        yolo_model=yolo_model,
         conf_threshold=0.2
     )
     model_output = model.extract_jersey_information(
         image_path=bboxed_path,
         system_prompt=system_prompt,
-        # prompt=f"Follow the system prompt. The detected digits from an OCR are provided in the following list: {predicted_digits}. "
-        #         "Use these detected digits to help you identify the jersey numbers of the players in the image. If you cannot confidently identify a player's jersey number, " 
-        #         "do not guess and leave it blank. Always use the detected digits as a reference to ensure your identifications are as accurate as possible."
+        prompt=f"Follow the system prompt. The detected digits from an OCR are provided in the following list: {predicted_digits}. " \
+                "These are only to be used as a guide for jersey numbers, not a final decision."
     )
 
     return img_path, model_output
