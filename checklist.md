@@ -40,3 +40,7 @@ Remove the cropped region of jersey and just use paddle ocr on the yolo cropped 
 Change the system prompt to check the predicted number above the bounding boxes created by paddleocr
 Utilize GPU resources to run faster
 Test confidence thresholds on both YOLO and paddleocr
+
+Utilize llama.cpp to run qwen3-vl:8b
+Try out the model Ken found on finding jersey digits and whole jerseys
+Test out multi threading on llama.cpp

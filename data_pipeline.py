@@ -35,7 +35,7 @@ def _process_image(img_path: str) -> tuple[str, dict]:
     bboxed_path = yolo_detection.detect_players_and_annotate(
         image_path=img_path,
         yolo_model=yolo_model,
-        conf_threshold=0.25
+        conf_threshold=0.3
     )
     model_output = model.extract_jersey_information(
         image_path=bboxed_path,
