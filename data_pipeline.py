@@ -1,4 +1,5 @@
-from ollama_model import OllamaModel
+from llama_model import LlamaCppModel
+from llama_model import OllamaModel
 from dataframe_creation import DataFrameCreator
 from compute_statistics import compute_f1_and_hallucination
 from pathlib import Path
@@ -14,8 +15,8 @@ import easyocr
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
-model_name = "gemma3:27b"
-model = OllamaModel(model_name=model_name)
+model_name = "qwen3-vl"
+model = LlamaCppModel(model_name=model_name, server_url="http://localhost:8080/v1/chat/completions")
 
 with open('system_prompt.txt', 'r') as file:
     system_prompt = str(file.read())
@@ -24,14 +25,14 @@ image_folder = Path("images/")
 image_files = [str(f) for f in image_folder.iterdir() if f.is_file()]
 
 yolo_model = YOLO("yolo26n.pt")
-ocr_model = easyocr.Reader(["en"], gpu=True)
+# ocr_model = easyocr.Reader(["en"], gpu=True)
 
 def _process_image(img_path: str) -> tuple[str, dict]:
-    predicted_digits = yolo_detection.extract_digits_from_boxes(
-        image_path=img_path,
-        yolo_model=yolo_model,
-        ocr_model=ocr_model
-    )
+    # predicted_digits = yolo_detection.extract_digits_from_boxes(
+    #     image_path=img_path,
+    #     yolo_model=yolo_model,
+    #     ocr_model=ocr_model
+    # )
     bboxed_path = yolo_detection.detect_players_and_annotate(
         image_path=img_path,
         yolo_model=yolo_model,
@@ -40,8 +41,8 @@ def _process_image(img_path: str) -> tuple[str, dict]:
     model_output = model.extract_jersey_information(
         image_path=bboxed_path,
         system_prompt=system_prompt,
-        prompt=f"Follow the system prompt. The detected digits from an OCR are provided in the following list: {predicted_digits}. " \
-                "These are only to be used as a guide for jersey numbers, not a final decision."
+        # prompt=f"Follow the system prompt. The detected digits from an OCR are provided in the following list: {predicted_digits}. " \
+        #         "These are only to be used as a guide for jersey numbers, not a final decision."
     )
 
     return img_path, model_output
