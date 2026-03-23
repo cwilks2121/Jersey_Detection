@@ -45,6 +45,8 @@ Utilize llama.cpp to run qwen3-vl:8b
 Try out the model Ken found on finding jersey digits and whole jerseys
 Test out multi threading on llama.cpp
 
+Download Deepseek model
+
 salloc \
 >   --partition=dlair-gpu-np \
 >   --qos=cs6953-gpu-np \
