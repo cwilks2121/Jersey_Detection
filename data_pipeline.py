@@ -11,12 +11,20 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
 from ultralytics import YOLO
 import easyocr
+import torch
+import sam_config
+
+torch.backends.cuda.matmul.allow_tf32 = True
+torch.backends.cudnn.allow_tf32 = True
+# torch.autocast("cuda", dtype=torch.bfloat16).__enter__()
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
 model_name = "qwen3-vl"
-model = LlamaCppModel(model_name=model_name, server_url="http://localhost:8080/v1/chat/completions")
+model = LlamaCppModel(model_name=model_name, server_url="https://citizenly-systematic-tessie.ngrok-free.dev/v1/chat/completions")
+
+sam_dir = Path("sam3/")
 
 with open('system_prompt.txt', 'r') as file:
     system_prompt = str(file.read())
@@ -24,8 +32,8 @@ with open('system_prompt.txt', 'r') as file:
 image_folder = Path("images/")
 image_files = [str(f) for f in image_folder.iterdir() if f.is_file()]
 
-yolo_model = YOLO("yolo26n.pt")
-# ocr_model = easyocr.Reader(["en"], gpu=True)
+# yolo_model = YOLO("yolo26n.pt")
+# ocr_model = easyocr.Reader(['en'], gpu=False)
 
 def _process_image(img_path: str) -> tuple[str, dict]:
     # predicted_digits = yolo_detection.extract_digits_from_boxes(
@@ -33,13 +41,15 @@ def _process_image(img_path: str) -> tuple[str, dict]:
     #     yolo_model=yolo_model,
     #     ocr_model=ocr_model
     # )
-    bboxed_path = yolo_detection.detect_players_and_annotate(
-        image_path=img_path,
-        yolo_model=yolo_model,
-        conf_threshold=0.3
-    )
+    segmented_path = sam_config.create_segmented_image(img_path)
+    # bboxed_path = yolo_detection.detect_players_and_annotate(
+    #     image_path=img_path,
+    #     yolo_model=yolo_model,
+    #     conf_threshold=0.3
+    # )
+    # segmented_path = yolo_detection.segment_players(
     model_output = model.extract_jersey_information(
-        image_path=bboxed_path,
+        image_path=segmented_path,
         system_prompt=system_prompt,
         # prompt=f"Follow the system prompt. The detected digits from an OCR are provided in the following list: {predicted_digits}. " \
         #         "These are only to be used as a guide for jersey numbers, not a final decision."

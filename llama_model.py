@@ -202,7 +202,7 @@ class LlamaCppModel:
 
         options = kwargs.get("options", {"temperature": 0.0})
         timeout = kwargs.get("timeout", 300)
-        max_tokens = kwargs.get("max_tokens", 512)
+        max_tokens = kwargs.get("max_tokens", 2000)
 
         image_data_url = self._image_data_url(image_path)
 
@@ -229,7 +229,8 @@ class LlamaCppModel:
             "stream": False,
             # Works only if the llama.cpp server/model supports this mode.
             "response_format": {
-                "type": "json_object"
+                "type": "json_object",
+                "json_schema": output_format
             },
         }
 

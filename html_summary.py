@@ -87,7 +87,7 @@ def generate_html_summary(system_prompt, model_name, elapsed_time, num_images, m
     df_styler = (
         model_df.style
         .apply(_row_fill, axis=1)
-        .format({"boxed_image": lambda p: img_tag(p, width=260),
+        .format({"segmented_image": lambda p: img_tag(p, width=260),
                 "image": lambda p: img_tag(p, width=260)})
         .set_properties(**{"text-align": "center", "vertical-align": "middle"})
         .set_table_styles([

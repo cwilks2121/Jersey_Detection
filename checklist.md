@@ -44,3 +44,12 @@ Test confidence thresholds on both YOLO and paddleocr
 Utilize llama.cpp to run qwen3-vl:8b
 Try out the model Ken found on finding jersey digits and whole jerseys
 Test out multi threading on llama.cpp
+
+salloc \
+>   --partition=dlair-gpu-np \
+>   --qos=cs6953-gpu-np \
+>   --account=cs6953-gpu-np \
+>   --gres=gpu:1 \
+>   --mem=32G \
+>   --cpus-per-task=8 \
+>   --time=02:00:00

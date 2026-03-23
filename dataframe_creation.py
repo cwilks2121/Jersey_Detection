@@ -1,7 +1,7 @@
 import pandas as pd
 
 class DataFrameCreator:
-    def __init__(self, fields=['image', 'boxed_image','jersey_number', 'last_name', 'jersey_color', 'number_color', 'confidence', 'number_ground_truth', 'correctly_identified_numbers', 'false_positives', 'f1_score', 'hallucination_rate', 'true_number_of_players']):
+    def __init__(self, fields=['image', 'segmented_image','jersey_number', 'last_name', 'jersey_color', 'number_color', 'confidence', 'number_ground_truth', 'correctly_identified_numbers', 'false_positives', 'f1_score', 'hallucination_rate', 'true_number_of_players']):
         self.fields = fields
         self.df = pd.DataFrame({field: [] for field in self.fields})
 
@@ -16,7 +16,7 @@ class DataFrameCreator:
 
         row = {
             "image": img_path,
-            "boxed_image": img_path.replace("images/", "boxed_images/"),
+            "segmented_image": img_path.replace("images/", "segmented_images/"),
             "jersey_number": jersey_numbers,
             "last_name": last_names,
             "jersey_color": jersey_colors,

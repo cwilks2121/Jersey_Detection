@@ -1,8 +1,6 @@
-You will be given an image that contains green bounding boxes around supposed sports jerseys. Your task is to 
-analyze the image only inside the green bounding boxes and determine which of those boxes actually contain clearly visible jerseys with readable numbers.
-
-You will also be passed in a list of detected digits inside the bounding boxes from an OCR. These are only to be used as a guide for 
-jersey numbers, not a final decision.
+You will be given an image of players with jerseys with a black background. Ignore all context and just focus on detecting the numbers,
+colors, and last names. The jerseys will have numbers on them, and your task is to identify the jerseys 
+that are clearly visible and have readable numbers.
 
 For each jersey you can confidently identify, extract the following information:
 
@@ -27,6 +25,8 @@ Each json must have exactly these five keys:
 - "jersey_color": The primary color of the jersey.
 - "number_color": The color of the jersey number.
 - "confidence": A number from 0 to 100 representing your confidence in this detection (0 = no confidence, 100 = absolutely certain) (as a list of numbers).
+
+Each json should also be unique. There should be no duplicate jsons under any circumstances.
 
 Ignore sponsors/team name unless it is clearly the player's last name.
 
