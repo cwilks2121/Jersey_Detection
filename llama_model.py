@@ -1,13 +1,14 @@
 import base64
 import json
+import re
 import requests
 import mimetypes
 from pathlib import Path
 
 class OllamaModel:
-    def __init__(self, model_name: str, ollama_url: str = "http://localhost:11434/api/chat"):
+    def __init__(self, model_name: str, server_url: str = "http://localhost:11434/api/chat"):
         self.model_name = model_name
-        self.ollama_url = ollama_url
+        self.ollama_url = server_url
         self.session = requests.Session()
         self.session.trust_env = False
 
@@ -134,6 +135,20 @@ class LlamaCppModel:
         img_b64 = self._b64_image(path)
         return f"data:{mime_type};base64,{img_b64}"
 
+    def _extract_json_object(self, text: str) -> str:
+        text = text.strip()
+
+        fence_match = re.match(r"^```(?:json)?\s*(.*?)\s*```$", text, flags=re.DOTALL)
+        if fence_match:
+            text = fence_match.group(1).strip()
+
+        start = text.find("{")
+        end = text.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            return text[start:end+1]
+
+        return text
+
     def extract_jersey_information(self, image_path: str, system_prompt: str, **kwargs) -> dict:
         """
         Extract jersey information from an image using a llama.cpp server.
@@ -242,7 +257,7 @@ class LlamaCppModel:
         response = self.session.post(self.server_url, json=payload, timeout=timeout)
 
         if response.status_code != 200:
-            raise RuntimeError(f"llama.cpp error {response.status_code}: {response.text}")
+            return {"jerseys": []}
 
         out = response.json()
 
@@ -259,6 +274,19 @@ class LlamaCppModel:
             content = "\n".join(text_parts).strip()
 
         try:
-            return json.loads(content)
-        except json.JSONDecodeError as exc:
-            raise RuntimeError(f"Model did not return valid JSON:\n{content}") from exc
+            content = self._extract_json_object(content)
+
+            # Handle empty or nonsense output
+            if not content or "{" not in content:
+                return {"jerseys": []}
+
+            parsed = json.loads(content)
+
+            # Ensure correct schema
+            if not isinstance(parsed, dict) or "jerseys" not in parsed:
+                return {"jerseys": []}
+
+            return parsed
+
+        except Exception:
+            return {"jerseys": []}

@@ -16,40 +16,40 @@ import sam_config
 
 torch.backends.cuda.matmul.allow_tf32 = True
 torch.backends.cudnn.allow_tf32 = True
-# torch.autocast("cuda", dtype=torch.bfloat16).__enter__()
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
-model_name = "qwen3-vl"
+model_name = "qwen3-vl-4b"
 model = LlamaCppModel(model_name=model_name, server_url="https://citizenly-systematic-tessie.ngrok-free.dev/v1/chat/completions")
 
-sam_dir = Path("sam3/")
+# sam_dir = Path("sam3/")
 
-with open('system_prompt.txt', 'r') as file:
+with open('system_prompt_vlm.txt', 'r') as file:
     system_prompt = str(file.read())
 
-image_folder = Path("images/")
+image_folder = Path("test_images/")
 image_files = [str(f) for f in image_folder.iterdir() if f.is_file()]
+print(len(image_files), "images found for processing.")
 
-# yolo_model = YOLO("yolo26n.pt")
-# ocr_model = easyocr.Reader(['en'], gpu=False)
+yolo_model = YOLO("yolo26n.pt")
+ocr_model = easyocr.Reader(['en'], gpu=True)
+# sam_model = sam_config.build_model(sam_dir)
 
 def _process_image(img_path: str) -> tuple[str, dict]:
+    # segmented_path = sam_config.create_segmented_image(sam_model, img_path)
     # predicted_digits = yolo_detection.extract_digits_from_boxes(
     #     image_path=img_path,
     #     yolo_model=yolo_model,
     #     ocr_model=ocr_model
     # )
-    segmented_path = sam_config.create_segmented_image(img_path)
-    # bboxed_path = yolo_detection.detect_players_and_annotate(
-    #     image_path=img_path,
-    #     yolo_model=yolo_model,
-    #     conf_threshold=0.3
-    # )
-    # segmented_path = yolo_detection.segment_players(
+    bboxed_path = yolo_detection.detect_players_and_annotate(
+        image_path=img_path,
+        yolo_model=yolo_model,
+        conf_threshold=0.3
+    )
     model_output = model.extract_jersey_information(
-        image_path=segmented_path,
+        image_path=bboxed_path,
         system_prompt=system_prompt,
         # prompt=f"Follow the system prompt. The detected digits from an OCR are provided in the following list: {predicted_digits}. " \
         #         "These are only to be used as a guide for jersey numbers, not a final decision."
@@ -60,12 +60,15 @@ def _process_image(img_path: str) -> tuple[str, dict]:
 df_creator = DataFrameCreator()
 start_time = time.time()
 
+iter = 1
+
 max_workers = int(os.getenv("PIPELINE_WORKERS", "1"))
 if max_workers <= 1:
     for img_path in image_files:
         _, model_output = _process_image(img_path)
         df_creator.append_df_from_output(model_output, img_path=img_path)
-        print(f"Processed {img_path}")
+        print(f"Processed {img_path} {iter}/{len(image_files)}")
+        iter += 1
 else:
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {executor.submit(_process_image, img_path): img_path for img_path in image_files}
@@ -73,7 +76,8 @@ else:
             img_path = futures[future]
             _, model_output = future.result()
             df_creator.append_df_from_output(model_output, img_path=img_path)
-            print(f"Processed {img_path}")
+            print(f"Processed {img_path} {iter}/{len(image_files)}")
+            iter += 1
 
 end_time = time.time()
 elapsed_time = end_time - start_time

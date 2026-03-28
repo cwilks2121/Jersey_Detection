@@ -54,4 +54,4 @@ salloc \
 >   --gres=gpu:1 \
 >   --mem=32G \
 >   --cpus-per-task=8 \
->   --time=02:00:00
+>   --time=10:00:00
